@@ -10,7 +10,9 @@ const {
     getDBStatus,
     forgotPassword,
     resetPassword,
-    setupDatabase
+    setupDatabase,
+    deleteUser,
+    updateUserByAdmin
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -24,5 +26,7 @@ router.get('/users', protect, getAllUsers);
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
 router.put('/change-password', protect, updateUserPassword);
+router.delete('/:id', protect, deleteUser);
+router.put('/:id', protect, updateUserByAdmin);
 
 module.exports = router;

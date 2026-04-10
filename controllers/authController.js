@@ -335,6 +335,54 @@ const setupDatabase = async (req, res) => {
     }
 };
 
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            // Prevent deleting the primary admin or self by accident
+            if (user.role === 'Admin' || user.role === 'CEO / Owner' || user.role === 'CEO') {
+                if(user._id.toString() !== req.user.id && req.user.role !== 'CEO / Owner' && req.user.role !== 'CEO') {
+                    return res.status(403).json({ message: 'Cannot delete an Admin or Owner account.' });
+                }
+            }
+            await User.findByIdAndDelete(req.params.id);
+            res.json({ message: 'User removed' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updateUserByAdmin = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.phone = req.body.phone || user.phone;
+            user.role = req.body.role || user.role;
+            user.email = req.body.email || user.email;
+            
+            if (user.role === 'Worker') {
+                user.address = req.body.address !== undefined ? req.body.address : user.address;
+                user.dob = req.body.dob !== undefined ? req.body.dob : user.dob;
+                user.age = req.body.age !== undefined ? req.body.age : user.age;
+                user.experience = req.body.experience !== undefined ? req.body.experience : user.experience;
+                user.hours = req.body.hours !== undefined ? req.body.hours : user.hours;
+                user.skills = req.body.skills !== undefined ? req.body.skills : user.skills;
+            }
+
+            const updatedUser = await user.save();
+            res.json({ message: 'User updated successfully', updatedUser });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = { 
     registerUser, 
     authUser, 
@@ -345,5 +393,7 @@ module.exports = {
     getDBStatus,
     forgotPassword,
     resetPassword,
-    setupDatabase
+    setupDatabase,
+    deleteUser,
+    updateUserByAdmin
 };
