@@ -103,14 +103,24 @@ const authUser = async (req, res) => {
             });
         } else {
             console.log('FAILURE: No user matched these credentials and role in database.');
-            // Let's check if the user exists but with a different role/password for debugging
-            const partialMatch = await User.findOne({ $or: [{ phone: trimmedIdentifier }, { email: trimmedIdentifier }] });
-            if (partialMatch) {
-                console.log('DEBUG: Found user with matching identifier, but Role or Password mismatch.');
-                console.log('DB User Role:', partialMatch.role);
-            } else {
-                console.log('DEBUG: No user found even with just Identifier.');
+            
+            // Debugging / Better Error Messaging
+            const userByIdentifier = await User.findOne({ 
+                $or: [{ phone: trimmedIdentifier }, { email: trimmedIdentifier }] 
+            });
+
+            if (!userByIdentifier) {
+                return res.status(401).json({ message: 'No account found with this mobile number or email.' });
             }
+
+            if (userByIdentifier.role !== role) {
+                return res.status(401).json({ message: `This account is registered as ${userByIdentifier.role}, not ${role}.` });
+            }
+
+            if (userByIdentifier.password !== password) {
+                return res.status(401).json({ message: 'Incorrect password. Please try again.' });
+            }
+
             res.status(401).json({ message: 'Invalid credentials or role' });
         }
     } catch (error) {
@@ -293,6 +303,38 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const setupDatabase = async (req, res) => {
+    try {
+        // Create Admin if not exists
+        const adminExists = await User.findOne({ role: 'Admin' });
+        if (!adminExists) {
+            await User.create({
+                name: 'Admin User',
+                phone: '9586780968',
+                email: 'adminuse0@gmail.com',
+                password: 'Admin@123',
+                role: 'Admin'
+            });
+        }
+
+        // Create CEO if not exists
+        const ceoExists = await User.findOne({ role: 'CEO / Owner' });
+        if (!ceoExists) {
+            await User.create({
+                name: 'CEO User',
+                phone: '9879272162',
+                email: 'adminuse0@gmail.com',
+                password: 'Ceo@123',
+                role: 'CEO / Owner'
+            });
+        }
+
+        res.json({ message: 'Database setup successful! Admin and CEO accounts are ready.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Setup failed', error: error.message });
+    }
+};
+
 module.exports = { 
     registerUser, 
     authUser, 
@@ -302,5 +344,6 @@ module.exports = {
     updateUserPassword,
     getDBStatus,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    setupDatabase
 };
