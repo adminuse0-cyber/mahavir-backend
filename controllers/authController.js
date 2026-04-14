@@ -257,15 +257,14 @@ const forgotPassword = async (req, res) => {
         `;
 
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
+            host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+            port: process.env.SMTP_PORT || 587,
+            secure: process.env.SMTP_PORT == 465, // True for 465, False for 587
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASS
             },
             tls: { rejectUnauthorized: false },
-            family: 4, // CRITICAL FIX for Render IPv6 drop!
             connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000
