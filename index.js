@@ -46,6 +46,35 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
+app.get('/test-smtp', async (req, res) => {
+    const nodemailer = require('nodemailer');
+    try {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.SMTP_EMAIL,
+                pass: process.env.SMTP_PASS
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000
+        });
+
+        const info = await transporter.sendMail({
+            from: process.env.SMTP_EMAIL,
+            to: process.env.SMTP_EMAIL, // Send to self
+            subject: 'Render SMTP Test',
+            text: 'This is a test from Render.'
+        });
+
+        res.json({ success: true, info });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message, stack: error.stack });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, console.log(`Server running on port ${PORT}`));
