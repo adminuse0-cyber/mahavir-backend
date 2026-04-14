@@ -46,33 +46,29 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-app.get('/test-smtp', async (req, res) => {
+app.get('/test-gmail', async (req, res) => {
     const nodemailer = require('nodemailer');
     try {
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: process.env.SMTP_PORT || 465,
+            secure: process.env.SMTP_PORT == 465, 
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASS
             },
-            tls: {
-                // do not fail on invalid certs
-                rejectUnauthorized: false
-            },
-            // Force IPv4
-            family: 4,
+            tls: { rejectUnauthorized: false },
+            family: 4, // CRITICAL
             connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000
         });
 
         const info = await transporter.sendMail({
-            from: process.env.SMTP_EMAIL,
-            to: process.env.SMTP_EMAIL, // Send to self
-            subject: 'Render SMTP Test',
-            text: 'This is a test from Render.'
+            from: `"Test" <${process.env.SMTP_EMAIL}>`,
+            to: process.env.SMTP_EMAIL,
+            subject: 'Render Gmail Test',
+            text: 'It works with family 4!'
         });
 
         res.json({ success: true, info });
