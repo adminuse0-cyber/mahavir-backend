@@ -26,6 +26,9 @@ const createOrder = async (req, res) => {
         user: process.env.SMTP_EMAIL || 'dummy@gmail.com',
         pass: process.env.SMTP_PASS || 'dummypass',
       },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000
     });
 
     let itemsHtml = items.map(item => `
@@ -72,17 +75,14 @@ const createOrder = async (req, res) => {
       `
     };
 
-    // Attempt to send email, catch and log if it fails but still return success to frontend
-    try {
-      if (process.env.SMTP_EMAIL && process.env.SMTP_PASS) {
-         await transporter.sendMail(mailOptions);
-         console.log('Order email sent to', email);
-      } else {
-         console.log('No valid SMTP details found. Email sending skipped. Output would be:');
-         console.log(mailOptions.html);
-      }
-    } catch (mailError) {
-      console.error('Error sending email:', mailError);
+    // Attempt to send email in background (Do not await!)
+    if (process.env.SMTP_EMAIL && process.env.SMTP_PASS) {
+      transporter.sendMail(mailOptions)
+        .then(() => console.log('Order email sent to', email))
+        .catch((mailError) => console.error('Error sending email:', mailError));
+    } else {
+       console.log('No valid SMTP details found. Email sending skipped. Output would be:');
+       console.log(mailOptions.html);
     }
 
     res.status(201).json({ message: 'Order placed successfully', orderId: savedOrder._id });
