@@ -265,6 +265,7 @@ const forgotPassword = async (req, res) => {
                 pass: process.env.SMTP_PASS
             },
             tls: { rejectUnauthorized: false },
+            family: 4, // forces IPv4 connection for Render bypass
             connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000
