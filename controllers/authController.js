@@ -245,7 +245,8 @@ const forgotPassword = async (req, res) => {
 
         await user.save();
 
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
         const message = `
         <h1>You have requested a password reset</h1>
@@ -261,15 +262,19 @@ const forgotPassword = async (req, res) => {
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASS
-            }
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000
         });
 
-        await transporter.sendMail({
+        transporter.sendMail({
             from: `"Mahavir Creation" <${process.env.SMTP_EMAIL}>`,
             to: user.email,
             subject: 'Password Reset Request',
             html: message
-        });
+        }).then(() => console.log('Reset link sent to', user.email))
+          .catch((err) => console.error('Failed to send reset link', err));
 
         res.json({ message: 'Password reset link sent to your email.' });
     } catch (error) {
