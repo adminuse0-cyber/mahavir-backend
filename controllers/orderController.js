@@ -21,11 +21,15 @@ const createOrder = async (req, res) => {
 
     // Send email logic
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.SMTP_EMAIL || 'dummy@gmail.com',
         pass: process.env.SMTP_PASS || 'dummypass',
       },
+      tls: { rejectUnauthorized: false },
+      family: 4,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000

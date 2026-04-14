@@ -257,12 +257,15 @@ const forgotPassword = async (req, res) => {
         `;
 
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASS
             },
+            tls: { rejectUnauthorized: false },
+            family: 4,
             connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000

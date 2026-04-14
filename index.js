@@ -57,6 +57,12 @@ app.get('/test-smtp', async (req, res) => {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASS
             },
+            tls: {
+                // do not fail on invalid certs
+                rejectUnauthorized: false
+            },
+            // Force IPv4
+            family: 4,
             connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000
