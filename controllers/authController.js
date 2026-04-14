@@ -271,7 +271,7 @@ const forgotPassword = async (req, res) => {
         });
 
         transporter.sendMail({
-            from: `"Mahavir Creation" <${process.env.SMTP_EMAIL}>`,
+            from: `"Mahavir Creation" <adminuse0@gmail.com>`,
             to: user.email,
             subject: 'Password Reset Request',
             html: message

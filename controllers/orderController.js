@@ -43,9 +43,9 @@ const createOrder = async (req, res) => {
     `).join('');
 
     const mailOptions = {
-      from: process.env.SMTP_EMAIL || 'dummy@gmail.com',
+      from: `"Mahavir Creation" <adminuse0@gmail.com>`,
       to: email,
-      bcc: process.env.SMTP_EMAIL || 'adminuse0@gmail.com', // Admin copy
+      bcc: 'adminuse0@gmail.com', // Admin copy
       subject: `Order Confirmation - Mahavir Creation (#${savedOrder._id})`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
